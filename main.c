@@ -144,26 +144,52 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
     if (otherinfos & 1){
         //white to move
+        unsigned long Npawnmoves = pawnmoves; /////////////////////////////////////////////////////////////////////////////////////////////change name like above
+        unsigned char Notherinfos = otherinfos;
+        uint64_t Nwpawn = wpawn;
+        uint64_t Nwqueen = wqueen;
+        unsigned uint64_t mask = 34292891647;//reset en passant for white
+        pawnmoves &= mask;
+        
         int score = -1000;
+        
         //pawnmoves
         uint64_t target = 9223372036854775808;
         for (int i = 0; i < 48; i++){
             target >>= 1;
-            if (target & wpawn){
+            if ((target & wpawn) && (i > 8)){
                 //move 1
-                uint64_t Nwpawn = wpawn;
+                mask = 1<<(i%8);
+                Npawnmoves &= ~mask; //removes the ability to double move
                 
-                int x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
-                if (x > score){
-                    score = x;
-                }
+                mask = target + target<<8;
+               	Nwpawn ^= target; //moves the pawn one rank
+               	if (!(Nwpawn & wrook & wknight & wbishop & wqueen & wking)){
+               		if (i < 16){
+                		Nwpawn ^= target<<8;
+                		Nwqueen ^= target<<8;
+                	}
+                	
+                	int x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                	if (x > score){
+		            score = x;
+		        }
+               	}
+		 
+		        
                 //move 2
-                Nwpawn = wpawn;
+                mask = 1<<(i%8);
+                if (pawnmoves & mask){
+		        Nwpawn = wpawn;
+		        Npawnmoves = pawnmoves;
 
-                x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
-                if (x > score){
-                    score = x;
+		        x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
+		        if (x > score){
+		            score = x;
+		        }
                 }
+                
+                
                 //eat right
                 Nwpawn = wpawn;
 
@@ -171,6 +197,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 if (x > score){
                     score = x;
                 }
+                
+                
                 //eat left
                 Nwpawn = wpawn;
 
@@ -178,6 +206,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 if (x > score){
                     score = x;
                 }
+                
+                
                 //eat right en passant 
                 Nwpawn = wpawn;
 
@@ -185,6 +215,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 if (x > score){
                     score = x;
                 }
+                
+                
                 //eat left en passant
                 Nwpawn = wpawn;
 
@@ -222,7 +254,7 @@ int main(){
     uint64_t bqueen = 1152921504606846976;
     uint64_t bking = 576460752303423488;
 
-    unsigned long pawnmv = 65535;//first 16 bits are for if it can take with en-passant \\ last 16 bits for if the first move is done
+    unsigned long pawnmv = 65535;//first 16 bits are for if it can be taken with en-passant (8b 8w)\\ last 16 bits for if the first move is done (8b 8w)
     unsigned char otherinfos = 241;//bleft bright wleft wright 0 0 \\ 1 bturn \\ 1 wturn
 
 
