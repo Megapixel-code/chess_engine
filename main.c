@@ -140,25 +140,26 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     if (depth == 0){
         return getEval(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
     }
+	
+	//set all New pieces
+	unsigned long Npawnmv = pawnmv;
+    unsigned char Notherinfos = otherinfos;
+    uint64_t Nwpawn = wpawn;
+    uint64_t Nwrook = wrook;
+    uint64_t Nwknight = wknight;
+    uint64_t Nwbishop = wbishop;
+    uint64_t Nwqueen = wqueen;
+    uint64_t Nwking = wking;
 
+    uint64_t Nbpawn = bpawn;
+    uint64_t Nbrook = brook;
+    uint64_t Nbknight = bknight;
+    uint64_t Nbbishop = bbishop;
+    uint64_t Nbqueen = bqueen;
+    uint64_t Nbking = bking;
 
     if (otherinfos & 1){
         //white to move
-        unsigned long Npawnmv = pawnmv;
-        unsigned char Notherinfos = otherinfos;
-        uint64_t Nwpawn = wpawn;
-        uint64_t Nwrook = wrook;
-        uint64_t Nwknight = wknight;
-        uint64_t Nwbishop = wbishop;
-        uint64_t Nwqueen = wqueen;
-        uint64_t Nwking = wking;
-
-        uint64_t Nbpawn = bpawn;
-        uint64_t Nbrook = brook;
-        uint64_t Nbknight = bknight;
-        uint64_t Nbbishop = bbishop;
-        uint64_t Nbqueen = bqueen;
-        uint64_t Nbking = bking;
 
         uint64_t mask = 34292891647; //reset en passant for white
         pawnmv &= mask;
@@ -169,14 +170,14 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
         //pawnmv
         uint64_t target = 9223372036854775808;
         for (int i = 0; i < 48; i++){
-            if ((target & wpawn) && (i > 8)){
+            if ((i > 8) && (target & wpawn)){//if the target is a pawn (cant have pawns in the first row they promoted)
                 //move 1
                 mask = 1<<(i%8);
                 Npawnmv &= ~mask; //removes the ability to double move
                 
                 mask = target + target<<8;
-               	Nwpawn ^= target; //moves the pawn one rank
-               	if (!(Nwpawn & wrook & wknight & wbishop & wqueen & wking)){
+               	Nwpawn ^= mask; //moves the pawn one rank
+               	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){//if the pawn can move in that direction
                		if (i < 16){
                 		Nwpawn ^= target<<8;
                 		Nwqueen ^= target<<8;
@@ -184,58 +185,71 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 	
                 	x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
                 	if (x > score){
-		                score = x;
-		            }
+		            	score = x;
+		        	}
+		        	Nwqueen = wqueen;
                	}
+               	Nwpawn = wpawn;
 		 
 		        
                 //move 2
                 mask = 1<<(i%8);
                 if (pawnmv & mask){
-                    Nwpawn = wpawn;
-                    Npawnmv = pawnmv;
-
-                    x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
-                    if (x > score){
-                        score = x;
-                    }
+                	Npawnmv = pawnmv ^ mask;//remove the double move
+                	Npawnmv = Npawnmv ^ mask<<16//makes so it can be taken en-passant
+                	
+                	mask = target + target<<8;
+                	Nwpawn ^= mask; //moves the pawn one rank
+                	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
+		            	mask <<= 8;
+		            	Nwpawn ^= mask; //moves the pawn one rank
+		            	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
+		            		x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+					    	if (x > score){
+					            score = x;
+					        }
+		            	}
+                	}
                 }
+                Npawnmv = pawnmv;
+                Nwpawn = wpawn;
                 
                 
                 //eat right
-                Nwpawn = wpawn;
+                
 
-                x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
+                Nwpawn = wpawn;
                 
                 
                 //eat left
-                Nwpawn = wpawn;
 
-                x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
+                Nwpawn = wpawn;
                 
                 
                 //eat right en passant 
-                Nwpawn = wpawn;
 
-                x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
+                Nwpawn = wpawn;
                 
                 
                 //eat left en passant
-                Nwpawn = wpawn;
-
-                x = minmax(Nwpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);
+                
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
+                Nwpawn = wpawn;
             }
             target >>= 1;
         }
@@ -246,7 +260,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     }
 
     //generate mv
-    minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);//^ 3 -> change the player color
+    //minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos ^ 3, depth - 1);//^ 3 -> change the player color
 }
 
 
