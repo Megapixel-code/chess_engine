@@ -59,6 +59,7 @@ void printBoard(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbish
         }
         target >>= 1;
     }
+    printf("\n\n================\n");
 }
 
 
@@ -140,6 +141,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     if (depth == 0){
         return getEval(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
     }
+    
+    //////////////////////////printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
 	
 	//set all New pieces
 	unsigned long Npawnmv = pawnmv;
@@ -169,21 +172,21 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
         
         //pawnmv
         uint64_t target = 9223372036854775808;
-        for (int i = 0; i < 48; i++){
+        for (int i = 0; i < 56; i++){
             if ((i > 8) && (target & wpawn)){//if the target is a pawn (cant have pawns in the first row they promoted)
                 //move 1
                 mask = 1<<(i%8);
                 Npawnmv &= ~mask; //removes the ability to double move
                 
-                mask = target + target<<8;
+                mask = target;
+                mask += target<<8;
                	Nwpawn ^= mask; //moves the pawn one rank
                	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){//if the pawn can move in that direction
                		if (i < 16){
                 		Nwpawn ^= target<<8;
                 		Nwqueen ^= target<<8;
                 	}
-                	
-                	x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                	x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 	if (x > score){
 		            	score = x;
 		        	}
@@ -196,15 +199,16 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 mask = 1<<(i%8);
                 if (pawnmv & mask){
                 	Npawnmv = pawnmv ^ mask;//remove the double move
-                	Npawnmv = Npawnmv ^ mask<<16//makes so it can be taken en-passant
+                	Npawnmv = Npawnmv ^ mask<<16;//makes so it can be taken en-passant
                 	
-                	mask = target + target<<8;
+                	mask = target;
+                	mask += target<<8;
                 	Nwpawn ^= mask; //moves the pawn one rank
                 	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
 		            	mask <<= 8;
-		            	Nwpawn ^= mask; //moves the pawn one rank
+		            	Nwpawn ^= mask; //moves the pawn one other rank
 		            	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
-		            		x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+		            		x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
 					    	if (x > score){
 					            score = x;
 					        }
@@ -216,18 +220,25 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 
                 //eat right
-                
-
-                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                if (i%8 < 7){}
+				
+                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
                 Nwpawn = wpawn;
+                Nbpawn = bpawn;
+				Nbrook = brook;
+				Nbknight = bknight;
+				Nbbishop = bbishop;
+				Nbqueen = bqueen;
+				Nbking = bking;
+                
                 
                 
                 //eat left
 
-                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
@@ -236,7 +247,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 //eat right en passant 
 
-                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
@@ -245,7 +256,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 //eat left en passant
                 
-                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, otherinfos ^ 3, depth - 1);
+                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
@@ -285,12 +296,12 @@ int main(){
     unsigned char otherinfos = 241;//bleft bright wleft wright 0 0 \\ 1 bturn \\ 1 wturn
 
 
-    //minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos, 1);
+    minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos, 1);
     printBoard(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
     
 
 
-    printf("%d", getEval(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos));
+    //printf("%d", getEval(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos));
     //printToB(wpawn);
     return 0;
 }
