@@ -220,25 +220,41 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 
                 //eat right
-                if (i%8 < 7){}
-				
-                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
-                if (x > score){
-                    score = x;
+                if (i%8 < 7){
+                	mask = target<<7;
+                	if (mask & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking){
+                		mask = ~mask;
+                		Nbpawn &= mask;
+                		Nbrook &= mask;
+                		Nbknight &= mask;
+                		Nbbishop &= mask;
+                		Nbqueen &= mask;
+                		Nbking &= mask;
+                		mask = ~mask;
+                		
+                		mask += target;
+                		Nwpawn ^= mask;
+                		
+                		printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
+		            	x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+				        if (x > score){
+				            score = x;
+				        }
+                	}
+		            	
+		            Nwpawn = wpawn;
+		            Nbpawn = bpawn;
+					Nbrook = brook;
+					Nbknight = bknight;
+					Nbbishop = bbishop;
+					Nbqueen = bqueen;
+					Nbking = bking;
                 }
-                Nwpawn = wpawn;
-                Nbpawn = bpawn;
-				Nbrook = brook;
-				Nbknight = bknight;
-				Nbbishop = bbishop;
-				Nbqueen = bqueen;
-				Nbking = bking;
-                
                 
                 
                 //eat left
 
-                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
@@ -247,7 +263,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 //eat right en passant 
 
-                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
@@ -256,7 +272,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 //eat left en passant
                 
-                //   x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                 if (x > score){
                     score = x;
                 }
