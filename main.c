@@ -175,7 +175,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
         for (int i = 0; i < 56; i++){
             if ((i > 8) && (target & wpawn)){//if the target is a pawn (cant have pawns in the first row they promoted)
 
-                //                                                 [move 1]
+                //-------------------------------------------------[move 1]-------------------------------------------------
 
                 //removes the ability to double move
                 mask = 1<<(i%8);
@@ -198,7 +198,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                	Nwpawn = wpawn;
 		 
 		        
-                //                                                 [move 2]
+                //-------------------------------------------------[move 2]-------------------------------------------------
                 mask = 1<<(i%8);
                 if (pawnmv & mask){
                 	Npawnmv = pawnmv ^ mask;//remove the double move
@@ -220,9 +220,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 }
                 Npawnmv = pawnmv;
                 Nwpawn = wpawn;
-                
-                
-                //                                                 [eat right]
+
+                //-------------------------------------------------[eat right]-------------------------------------------------
                 if (i%8 < 7){
                     if (pawnmv & 2147483648>>((i%8)+1)){//if you can eat en passant 
                         printf("en passant !!!!!!!!!!!!!!!!!!!!!!!!!!! \n");
@@ -255,10 +254,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                     else{// eat right normaly 
                         mask = target<<7;
                         if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//check if there is a piece to eat
-                            //removes the ability to double move
-                            mask = 1<<(i%8);
-                            Npawnmv &= ~mask; 
-
                             //remove the piece that got eated
                             mask = ~mask;
                             Nbpawn &= mask;
@@ -277,8 +272,11 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 mask += target;
                                 Nwpawn ^= mask;
                             }
+
+                            //removes the ability to double move
+                            mask = 1<<(i%8);
+                            Npawnmv &= ~mask; 
                                                         
-                            printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
                             x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                             if (x > score){
                                 score = x;
@@ -296,16 +294,82 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 }
                 
                 
-                //                                                 [eat left]
+                //-------------------------------------------------[eat left]-------------------------------------------------
+                if (i%8){
+                    if (pawnmv & 8388608>>((i%8)-1)){//if you can eat en passant 
+                        printf("en passant !!!!!!!!!!!!!!!!!!!!!!!!!!! \n");
+                        printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
+                        mask = target<<1;
+                        
+                        //remove the piece that got eated
+                        Nbpawn &= ~mask;
+                        
+                        //move the pawn
+                        mask <<= 8;
+                        mask += target;
+                        Nwpawn ^= mask;
+                        
+                                                    
+                        printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        Nwpawn = wpawn;
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                        Nbking = bking;
+                    }
 
-                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
-                if (x > score){
-                    score = x;
+                    else{// eat left normaly 
+                        mask = target<<9;
+                        if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//check if there is a piece to eat
+                            //remove the piece that got eated
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+                            
+                            if (i < 8){//if you promote
+                                Nwqueen ^= mask;
+                                Nwpawn ^= target;
+                            }
+                            else{//move the pawn
+                                mask += target;
+                                Nwpawn ^= mask;
+                            }
+
+                            //removes the ability to double move
+                            mask = 1<<(i%8);
+                            Npawnmv &= ~mask;
+                            
+                            x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                            if (x > score){
+                                score = x;
+                            }
+                            Nwpawn = wpawn;
+                            Nbpawn = bpawn;
+                            Nbrook = brook;
+                            Nbknight = bknight;
+                            Nbbishop = bbishop;
+                            Nbqueen = bqueen;
+                            Nbking = bking;
+                            Npawnmv = pawnmv;
+                        }
+                    }
                 }
-                Nwpawn = wpawn;
             }
             target >>= 1;
         }
+
+        //othermoves
     }
 
     else{
