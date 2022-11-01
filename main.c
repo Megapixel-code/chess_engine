@@ -162,16 +162,100 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     uint64_t Nbking = bking;
 
     if (otherinfos & 1){
-        //white to move
+        //#########################################################[white to move]##################################################
 
         uint64_t mask = 34292891647; //reset en passant for white
         pawnmv &= mask;
         
         int score = -1000;
         int x = -1000;
-        
-        //pawnmv
+
+        uint64_t *piece;
+        //=========================================================[moves +]====================================================
         uint64_t target = 9223372036854775808;
+        for (int i = 0; i < 64; i++){
+            if (target & (wqueen | wrook)){
+                //assign pointer to the piece we move
+                if (target & wrook){
+                    if (i == 63){
+                        //removes casling white right
+                        Notherinfos &= 239;
+                    }
+                    else if (i == 55){
+                        //removes casling white left
+                        Notherinfos &= 223;
+                    }
+                    piece = &Nwrook;
+                }
+                else {
+                    piece = &Nwqueen;
+                }
+
+                //move the piece
+                //-------------------------------------------------[move up]------------------------------------------------
+                char dontExit = 1;
+                mask = target;
+                mask <<= 8;
+                
+                while (mask != 0 & dontExit){
+                    if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
+                        dontExit = 0;
+                    }
+                    else {
+                        //remove the main piece
+                        *piece ^= target;
+                        //place piece
+                        *piece ^= mask;
+                        //if piece eated somme
+                        if (*piece & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){
+                            dontExit = 0;
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                                if (mask & 9223372036854775808){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        //evaluate
+                        printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        //remove piece
+                        *piece ^= mask;
+                        mask <<= 8;
+                    }
+                    
+                    Nwrook = wrook;
+                    Nwqueen = wqueen;
+
+                    Nbpawn = bpawn;
+                    Nbrook = brook;
+                    Nbknight = bknight;
+                    Nbbishop = bbishop;
+                    Nbqueen = bqueen;
+                    Nbking = bking;
+
+                    Notherinfos = otherinfos;
+                }
+            }
+            target >>= 1;
+        }
+        
+        //=========================================================[pawnmv]=====================================================
+        target = 9223372036854775808;
         for (int i = 0; i < 56; i++){
             if ((i > 8) && (target & wpawn)){//if the target is a pawn (cant have pawns in the first row they promoted)
 
@@ -265,6 +349,9 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                             mask = ~mask;
                             
                             if (i < 8){//if you promote
+                                if (i == 7){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
                                 Nwqueen ^= mask;
                                 Nwpawn ^= target;
                             }
@@ -289,6 +376,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                             Nbqueen = bqueen;
                             Nbking = bking;
                             Npawnmv = pawnmv;
+                            Notherinfos = otherinfos;
                         }
                     }
                 }
@@ -338,6 +426,9 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                             mask = ~mask;
                             
                             if (i < 8){//if you promote
+                                if (i == 0){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
                                 Nwqueen ^= mask;
                                 Nwpawn ^= target;
                             }
@@ -362,13 +453,13 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                             Nbqueen = bqueen;
                             Nbking = bking;
                             Npawnmv = pawnmv;
+                            Notherinfos = otherinfos;
                         }
                     }
                 }
             }
             target >>= 1;
         }
-
         //othermoves
     }
 
