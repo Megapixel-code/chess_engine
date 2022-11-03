@@ -160,7 +160,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     uint64_t Nbbishop = bbishop;
     uint64_t Nbqueen = bqueen;
     uint64_t Nbking = bking;
-
+    
     if (otherinfos & 1){
         //#########################################################[white to move]##################################################
 
@@ -190,6 +190,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 else {
                     piece = &Nwqueen;
                 }
+                //remove the main piece
+                *piece ^= target;
 
                 //move the piece
                 //-------------------------------------------------[move up]------------------------------------------------
@@ -201,8 +203,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         dontExit = 0;
                     }
                     else {
-                        //remove the main piece
-                        *piece ^= target;
                         //place piece
                         *piece ^= mask;
                         //if piece eated somme
@@ -235,9 +235,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         *piece ^= mask;
                         mask <<= 8;
                     }
-                    
-                    Nwrook = wrook;
-                    Nwqueen = wqueen;
 
                     Nbpawn = bpawn;
                     Nbrook = brook;
@@ -258,8 +255,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         dontExit = 0;
                     }
                     else {
-                        //remove the main piece
-                        *piece ^= target;
                         //place piece
                         *piece ^= mask;
                         //if piece eated somme
@@ -292,9 +287,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         *piece ^= mask;
                         mask >>= 8;
                     }
-                    
-                    Nwrook = wrook;
-                    Nwqueen = wqueen;
 
                     Nbpawn = bpawn;
                     Nbrook = brook;
@@ -315,8 +307,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         dontExit = 0;
                     }
                     else {
-                        //remove the main piece
-                        *piece ^= target;
                         //place piece
                         *piece ^= mask;
                         //if piece eated somme
@@ -349,9 +339,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         *piece ^= mask;
                         mask >>= 1;
                     }
-                    
-                    Nwrook = wrook;
-                    Nwqueen = wqueen;
 
                     Nbpawn = bpawn;
                     Nbrook = brook;
@@ -372,8 +359,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         dontExit = 0;
                     }
                     else {
-                        //remove the main piece
-                        *piece ^= target;
                         //place piece
                         *piece ^= mask;
                         //if piece eated somme
@@ -406,9 +391,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         *piece ^= mask;
                         mask <<= 1;
                     }
-                    
-                    Nwrook = wrook;
-                    Nwqueen = wqueen;
 
                     Nbpawn = bpawn;
                     Nbrook = brook;
@@ -431,6 +413,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 else {
                     piece = &Nwqueen;
                 }
+                //remove the main piece
+                *piece ^= target;
 
                 //move the piece
                 //-------------------------------------------------[move left up]------------------------------------------------
@@ -442,8 +426,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         dontExit = 0;
                     }
                     else {
-                        //remove the main piece
-                        *piece ^= target;
                         //place piece
                         *piece ^= mask;
                         //if piece eated somme
@@ -468,7 +450,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                             }
                         }
                         //evaluate
-                        printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
                         x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
                         if (x > score){
                             score = x;
@@ -477,9 +458,162 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                         *piece ^= mask;
                         mask <<= 9;
                     }
-                    
-                    Nwrook = wrook;
-                    Nwqueen = wqueen;
+
+                    Nbpawn = bpawn;
+                    Nbrook = brook;
+                    Nbknight = bknight;
+                    Nbbishop = bbishop;
+                    Nbqueen = bqueen;
+                    Nbking = bking;
+
+                    Notherinfos = otherinfos;
+                }
+
+                //-------------------------------------------------[move left down]------------------------------------------------
+                dontExit = 1;
+                mask = target >> 7;
+                
+                while (dontExit & mask != 0 & !(mask & 72340172838076673)){//72340172838076673 is a wall of 1 on the right
+                    if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
+                        dontExit = 0;
+                    }
+                    else {
+                        //place piece
+                        *piece ^= mask;
+                        //if piece eated somme
+                        if (*piece & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){
+                            dontExit = 0;
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                                if (mask & 9223372036854775808){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        //remove piece
+                        *piece ^= mask;
+                        mask >>= 7;
+                    }
+
+                    Nbpawn = bpawn;
+                    Nbrook = brook;
+                    Nbknight = bknight;
+                    Nbbishop = bbishop;
+                    Nbqueen = bqueen;
+                    Nbking = bking;
+
+                    Notherinfos = otherinfos;
+                }
+
+                //-------------------------------------------------[move right up]------------------------------------------------
+                dontExit = 1;
+                mask = target << 7;
+                
+                while (dontExit & mask != 0 & !(mask & 9259542123273814144)){//9259542123273814144 is a wall of 1 on the left
+                    if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
+                        dontExit = 0;
+                    }
+                    else {
+                        //place piece
+                        *piece ^= mask;
+                        //if piece eated somme
+                        if (*piece & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){
+                            dontExit = 0;
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                                if (mask & 9223372036854775808){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        //remove piece
+                        *piece ^= mask;
+                        mask <<= 7;
+                    }
+
+                    Nbpawn = bpawn;
+                    Nbrook = brook;
+                    Nbknight = bknight;
+                    Nbbishop = bbishop;
+                    Nbqueen = bqueen;
+                    Nbking = bking;
+
+                    Notherinfos = otherinfos;
+                }
+
+                //-------------------------------------------------[move right down]------------------------------------------------
+                dontExit = 1;
+                mask = target >> 9;
+                
+                while (dontExit & mask != 0 & !(mask & 9259542123273814144)){//9259542123273814144 is a wall of 1 on the left
+                    if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
+                        dontExit = 0;
+                    }
+                    else {
+                        //place piece
+                        *piece ^= mask;
+                        //if piece eated somme
+                        if (*piece & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){
+                            dontExit = 0;
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                                if (mask & 9223372036854775808){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        //remove piece
+                        *piece ^= mask;
+                        mask >>= 9;
+                    }
 
                     Nbpawn = bpawn;
                     Nbrook = brook;
