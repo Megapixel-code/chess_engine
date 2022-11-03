@@ -11,7 +11,7 @@ inverse ~
 
 
 void printBoard(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop, uint64_t wqueen, uint64_t wking, uint64_t bpawn, uint64_t brook, uint64_t bknight, uint64_t bbishop, uint64_t bqueen, uint64_t bking, unsigned char otherinfos){
-    uint64_t target = 9223372036854775808;
+    uint64_t target = 9223372036854775808LLU;
     for (int i = 0; i < 64; i++){
         if (!(i%8)){
             printf("\n");
@@ -64,7 +64,7 @@ void printBoard(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbish
 
 
 void printToB(uint64_t x){
-    uint64_t target = 9223372036854775808;
+    uint64_t target = 9223372036854775808LLU;
     for (int i = 0; i < 64; i++){
         if (!(i%8)){
             printf("\n");
@@ -90,7 +90,7 @@ char getNthBNum(uint64_t x, int n){//getNthBNum(001, 0) = 1, getNthBNum(001, 1) 
 
 
 int getEval(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop, uint64_t wqueen, uint64_t wking, uint64_t bpawn, uint64_t brook, uint64_t bknight, uint64_t bbishop, uint64_t bqueen, uint64_t bking, unsigned char otherinfos){
-    uint64_t target = 9223372036854775808;
+    uint64_t target = 9223372036854775808LLU;
     int count = 0;
 
     for (int i = 0; i < 64; i++){
@@ -160,7 +160,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
     uint64_t Nbbishop = bbishop;
     uint64_t Nbqueen = bqueen;
     uint64_t Nbking = bking;
-    
+
     if (otherinfos & 1){
         //#########################################################[white to move]##################################################
 
@@ -171,7 +171,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
         int x = -1000;
 
         uint64_t *piece;
-        uint64_t target = 9223372036854775808;
+        uint64_t target = 9223372036854775808LLU;
         for (int i = 0; i < 64; i++){
             //=========================================================[moves +]================================================
             if (target & (wqueen | wrook)){
@@ -221,7 +221,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -273,7 +273,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -302,7 +302,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 dontExit = 1;
                 mask = target >> 1;
                 
-                while (dontExit & !(mask & 9259542123273814144) & mask != 0){//9259542123273814144 is a wall of 1 on the left
+                while (dontExit & !(mask & 9259542123273814144LLU) & mask != 0){//9259542123273814144 is a wall of 1 on the left
                     if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
                         dontExit = 0;
                     }
@@ -325,7 +325,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -377,7 +377,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -444,7 +444,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -496,7 +496,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -525,7 +525,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 dontExit = 1;
                 mask = target << 7;
                 
-                while (dontExit & mask != 0 & !(mask & 9259542123273814144)){//9259542123273814144 is a wall of 1 on the left
+                while (dontExit & mask != 0 & !(mask & 9259542123273814144LLU)){//9259542123273814144 is a wall of 1 on the left
                     if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
                         dontExit = 0;
                     }
@@ -548,7 +548,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -577,7 +577,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 dontExit = 1;
                 mask = target >> 9;
                 
-                while (dontExit & mask != 0 & !(mask & 9259542123273814144)){//9259542123273814144 is a wall of 1 on the left
+                while (dontExit & mask != 0 & !(mask & 9259542123273814144LLU)){//9259542123273814144 is a wall of 1 on the left
                     if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
                         dontExit = 0;
                     }
@@ -600,7 +600,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                                 if (mask & 72057594037927936){
                                     Notherinfos &= 191;//removes casling black right
                                 }
-                                if (mask & 9223372036854775808){
+                                if (mask & 9223372036854775808LLU){
                                     Notherinfos &= 127;//removes casling black left
                                 }
                             }
@@ -625,11 +625,157 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                     Notherinfos = otherinfos;
                 }
             }
+
+            //=========================================================[knightmv]===================================================
+
+            //---------------------------------------------------------[up and down]--------------------------------------------
+            for (int __ = 0; __ < 2; __++){
+                //
+            }
+
+            //---------------------------------------------------------[right and left]-----------------------------------------
+
+            //=========================================================[kingmv]=====================================================
+            if (target & wking){
+                Nwking ^= target;//remove the wking
+                mask = target << 9;
+                for (int _ = 0; _ < 2; _++){//line up and down
+                    for (int __ = 0; __ < 3; __++){//3 cases over and under
+                        if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0){//no white pieces there
+                            //place the king
+                            Nwking ^= mask;
+                            
+                            if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                                mask = ~mask;
+                                Nbpawn &= mask;
+                                Nbrook &= mask;
+                                Nbknight &= mask;
+                                Nbbishop &= mask;
+                                Nbqueen &= mask;
+                                Nbking &= mask;
+                                mask = ~mask;
+                                {    
+                                    //remove the casling if he eats the corner
+                                    if (mask & 72057594037927936){
+                                        Notherinfos &= 191;//removes casling black right
+                                    }
+                                    if (mask & 9223372036854775808LLU){
+                                        Notherinfos &= 127;//removes casling black left
+                                    }
+                                }
+                                //evaluate
+                                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                                if (x > score){
+                                    score = x;
+                                }
+
+                                //reset if eaten
+                                Nbpawn = bpawn;
+                                Nbrook = brook;
+                                Nbknight = bknight;
+                                Nbbishop = bbishop;
+                                Nbqueen = bqueen;
+                            }
+                            else{
+                                //evaluate
+                                x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                                if (x > score){
+                                    score = x;
+                                }
+                            }
+
+                            //removes the king
+                            Nwking ^= mask;
+                        }
+                    }
+                    mask >>= 14;
+                }
+
+                //wking move right and left (no need to check if you break casling bc you wouldnt be able to be here)
+                mask = target << 1;
+                if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0 & (i%8 != 0)){//no white pieces there
+                    //place the king
+                    Nwking ^= mask;
+
+                    if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                        mask = ~mask;
+                        Nbpawn &= mask;
+                        Nbrook &= mask;
+                        Nbknight &= mask;
+                        Nbbishop &= mask;
+                        Nbqueen &= mask;
+                        Nbking &= mask;
+                        mask = ~mask;
+
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+
+                        //reset if eaten
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                    }
+                    else {
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                    }
+                    //remove the king
+                    Nwking ^= mask;
+                }
+
+                mask = target >> 1;
+                if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0 & (i%8 != 7)){//no white pieces there
+                    //place the king
+                    Nwking ^= mask;
+
+                    if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                        mask = ~mask;
+                        Nbpawn &= mask;
+                        Nbrook &= mask;
+                        Nbknight &= mask;
+                        Nbbishop &= mask;
+                        Nbqueen &= mask;
+                        Nbking &= mask;
+                        mask = ~mask;
+
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+
+                        //reset if eaten
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                    }
+                    else {
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                    }
+                    //remove the king
+                    Nwking ^= mask;
+                }
+            }
+
             target >>= 1;
         }
         
         //=========================================================[pawnmv]=====================================================
-        target = 9223372036854775808;
+        target = 9223372036854775808LLU;
         for (int i = 0; i < 56; i++){
             if ((i > 8) && (target & wpawn)){//if the target is a pawn (cant have pawns in the first row they promoted)
 
@@ -847,8 +993,6 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
 
 int main(){
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-
     uint64_t wpawn = 65280;
     uint64_t wrook = 129;
     uint64_t wknight = 66;
@@ -856,12 +1000,12 @@ int main(){
     uint64_t wqueen = 16;
     uint64_t wking = 8;
 
-    uint64_t bpawn = 71776119061217280;
-    uint64_t brook = 9295429630892703744;
-    uint64_t bknight = 4755801206503243776;
-    uint64_t bbishop = 2594073385365405696;
-    uint64_t bqueen = 1152921504606846976;
-    uint64_t bking = 576460752303423488;
+    uint64_t bpawn = 71776119061217280LLU;
+    uint64_t brook = 9295429630892703744LLU;
+    uint64_t bknight = 4755801206503243776LLU;
+    uint64_t bbishop = 2594073385365405696LLU;
+    uint64_t bqueen = 1152921504606846976LLU;
+    uint64_t bking = 576460752303423488LLU;
 
     unsigned long pawnmv = 65535;//first 16 bits are for if it can be taken with en-passant (8b 8w)\\ last 16 bits for if the first move is done (8b 8w)
     unsigned char otherinfos = 241;//bleft bright wleft wright 0 0 \\ 1 bturn \\ 1 wturn
