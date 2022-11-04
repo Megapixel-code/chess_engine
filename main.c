@@ -173,7 +173,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
         uint64_t *piece;
         uint64_t target = 9223372036854775808LLU;
         for (int i = 0; i < 64; i++){
-            //=========================================================[moves +]================================================
+            //=========================================================[moves +]====================================================
             if (target & (wqueen | wrook)){
                 //assign pointer to the piece we move
                 if (target & wrook){
@@ -401,6 +401,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                     Notherinfos = otherinfos;
                 }
+                *piece ^= target;//place the piece back
             }
 
             
@@ -421,7 +422,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 char dontExit = 1;
                 mask = target << 9;
                 
-                while (dontExit & mask != 0 & !(mask & 72340172838076673)){//72340172838076673 is a wall of 1 on the right
+                while (dontExit && mask != 0 && !(mask & 72340172838076673)){//72340172838076673 is a wall of 1 on the right
                     if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
                         dontExit = 0;
                     }
@@ -577,8 +578,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 dontExit = 1;
                 mask = target >> 9;
                 
-                while (dontExit & mask != 0 & !(mask & 9259542123273814144LLU)){//9259542123273814144 is a wall of 1 on the left
-                    if (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)){
+                while (dontExit && mask != 0 && (mask & 9259542123273814144LLU) == 0){//9259542123273814144 is a wall of 1 on the left
+                    if ((mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) != 0){//colide with piece
                         dontExit = 0;
                     }
                     else {
@@ -624,28 +625,214 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                     Notherinfos = otherinfos;
                 }
+                //place the piece back
+                *piece ^= target;
             }
+
 
             //=========================================================[knightmv]===================================================
+            if (target & wknight){
+                Nwknight ^= target;//remove the knight
+                //---------------------------------------------------------[up and down]----------------------------------------
+                mask = target<<17;
+                for (int __ = 0; __ < 2; __++){
+                    
+                    if (mask != 0 && (mask & 72340172838076673) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//72340172838076673 is a wall of 1 on the right
+                        //place knight
+                        Nwknight ^= mask;
 
-            //---------------------------------------------------------[up and down]--------------------------------------------
-            for (int __ = 0; __ < 2; __++){
-                //
+                        if (Nwknight & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat somme
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 9223372036854775808LLU){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        
+                        //removes the knight
+                        Nwknight ^= mask;
+
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                        Nbking = bking;
+
+                        Notherinfos = otherinfos;
+                    }
+
+                    mask>>=2;
+                    
+                    if (mask != 0 && (mask & 9259542123273814144LLU) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//9259542123273814144 is a wall of 1 on the left
+                        //place knight
+                        Nwknight ^= mask;
+
+                        if (Nwknight & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat somme
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                            }
+                        }
+                        
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        
+                        //removes the knight
+                        Nwknight ^= mask;
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                        Nbking = bking;
+
+                        Notherinfos = otherinfos;
+                    }
+                    
+
+                    mask = target>>15;
+                }
+                
+                //---------------------------------------------------------[left and right]-------------------------------------
+
+                mask = target<<10;
+                for (int __ = 0; __ < 2; __++){
+                    if (mask != 0 && (mask & 217020518514230019) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//217020518514230019 is a wall of 2 1 on the right
+                        //place knight
+                        Nwknight ^= mask;
+
+                        if (Nwknight & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat somme
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 72057594037927936){
+                                    Notherinfos &= 191;//removes casling black right
+                                }
+                            }
+                        }
+                        
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        
+                        //removes the knight
+                        Nwknight ^= mask;
+
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                        Nbking = bking;
+
+                        Notherinfos = otherinfos;
+                    }
+
+                    mask>>=16;
+                }
+
+                mask = target<<6;
+                for (int __ = 0; __ < 2; __++){
+                    if (mask != 0 && (mask & 13889313184910721216) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//13889313184910721216 is a wall of 2 1 on the left
+                        //place knight
+                        Nwknight ^= mask;
+
+                        if (Nwknight & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat somme
+                            mask = ~mask;
+                            Nbpawn &= mask;
+                            Nbrook &= mask;
+                            Nbknight &= mask;
+                            Nbbishop &= mask;
+                            Nbqueen &= mask;
+                            Nbking &= mask;
+                            mask = ~mask;
+
+                            {    
+                                //remove the casling if he eats the corner
+                                if (mask & 9223372036854775808LLU){
+                                    Notherinfos &= 127;//removes casling black left
+                                }
+                            }
+                        }
+                        
+                        //evaluate
+                        x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
+                        if (x > score){
+                            score = x;
+                        }
+                        
+                        //removes the knight
+                        Nwknight ^= mask;
+
+                        Nbpawn = bpawn;
+                        Nbrook = brook;
+                        Nbknight = bknight;
+                        Nbbishop = bbishop;
+                        Nbqueen = bqueen;
+                        Nbking = bking;
+
+                        Notherinfos = otherinfos;
+                    }
+
+                    mask>>=16;
+                }
+
+                Nwknight ^= target;//place the knight back
             }
 
-            //---------------------------------------------------------[right and left]-----------------------------------------
 
-            //=========================================================[kingmv]=====================================================
+            //=========================================================[kingmv]=====================================================//king left and right dont colide
             if (target & wking){
                 Nwking ^= target;//remove the wking
                 mask = target << 9;
                 for (int _ = 0; _ < 2; _++){//line up and down
                     for (int __ = 0; __ < 3; __++){//3 cases over and under
-                        if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0){//no white pieces there
+                        if ((mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) == 0 && mask != 0){//no white pieces there
                             //place the king
                             Nwking ^= mask;
                             
-                            if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                            if ((mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking) != 0)){//if you eat piece
                                 mask = ~mask;
                                 Nbpawn &= mask;
                                 Nbrook &= mask;
@@ -693,11 +880,11 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                 //wking move right and left (no need to check if you break casling bc you wouldnt be able to be here)
                 mask = target << 1;
-                if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0 & (i%8 != 0)){//no white pieces there
+                if ((mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) == 0 && mask != 0 && (i%8 != 0)){//no white pieces there
                     //place the king
                     Nwking ^= mask;
 
-                    if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                    if ((mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) != 0){//if you eat piece
                         mask = ~mask;
                         Nbpawn &= mask;
                         Nbrook &= mask;
@@ -732,11 +919,11 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 }
 
                 mask = target >> 1;
-                if (!(mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) & mask != 0 & (i%8 != 7)){//no white pieces there
+                if ((mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen)) == 0 && mask != 0 && (i%8 != 7)){//no white pieces there
                     //place the king
                     Nwking ^= mask;
 
-                    if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//if you eat piece
+                    if ((mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking) != 0)){//if you eat piece
                         mask = ~mask;
                         Nbpawn &= mask;
                         Nbrook &= mask;
@@ -769,6 +956,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                     //remove the king
                     Nwking ^= mask;
                 }
+                Nwking ^= target;//place the king back
             }
 
             target >>= 1;
@@ -788,7 +976,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 mask = target;
                 mask += target<<8;
                	Nwpawn ^= mask; //moves the pawn one rank
-               	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){//if the pawn can move in that direction
+               	if ((Nwpawn & (Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking | Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) == 0){//if the pawn can move in that direction
                		if (i < 16){
                 		Nwpawn ^= target<<8;
                 		Nwqueen ^= target<<8;
@@ -804,17 +992,17 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 		        
                 //-------------------------------------------------[move 2]-------------------------------------------------
                 mask = 1<<(i%8);
-                if (pawnmv & mask != 0){
+                if ((pawnmv & mask) != 0){
                 	Npawnmv = pawnmv ^ mask;//remove the double move
                 	Npawnmv = Npawnmv ^ mask<<16;//makes so it can be taken en-passant
                 	
                 	mask = target;
                 	mask += target<<8;
                 	Nwpawn ^= mask; //moves the pawn one rank
-                	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
+                	if ((Nwpawn & (Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking | Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) == 0){
 		            	mask <<= 8;
 		            	Nwpawn ^= mask; //moves the pawn one other rank
-		            	if (!(Nwpawn & Nwrook & Nwknight & Nwbishop & Nwqueen & Nwking & Nbpawn & Nbrook & Nbknight & Nbbishop & Nbqueen & Nbking)){
+		            	if ((Nwpawn & (Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking | Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) == 0){
 		            		x = minmax(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Npawnmv, Notherinfos ^ 3, depth - 1);
 					    	if (x > score){
 					            score = x;
@@ -827,8 +1015,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                 //-------------------------------------------------[eat right]-------------------------------------------------
                 if (i%8 < 7){
-                    if (pawnmv & 2147483648>>((i%8)+1)){//if you can eat en passant 
-                        printf("en passant !!!!!!!!!!!!!!!!!!!!!!!!!!! \n");
+                    if ((pawnmv & 2147483648>>(i%8)) != 0){//if you can eat en passant 
+                        printf("en passant right !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
                         printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
                         mask = target>>1;
                         
@@ -857,7 +1045,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                     else{// eat right normaly 
                         mask = target<<7;
-                        if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//check if there is a piece to eat
+                        if ((mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) != 0){//check if there is a piece to eat
                             //remove the piece that got eated
                             mask = ~mask;
                             Nbpawn &= mask;
@@ -904,8 +1092,8 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 
                 //-------------------------------------------------[eat left]-------------------------------------------------
                 if (i%8){
-                    if (pawnmv & 8388608>>((i%8)-1)){//if you can eat en passant 
-                        printf("en passant !!!!!!!!!!!!!!!!!!!!!!!!!!! \n");
+                    if ((pawnmv & 8388608>>(i%8)) != 0){//if you can eat en passant 
+                        printf("en passant left !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
                         printBoard(Nwpawn, Nwrook, Nwknight, Nwbishop, Nwqueen, Nwking, Nbpawn, Nbrook, Nbknight, Nbbishop, Nbqueen, Nbking, Notherinfos);
                         mask = target<<1;
                         
@@ -934,7 +1122,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                     else{// eat left normaly 
                         mask = target<<9;
-                        if (mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)){//check if there is a piece to eat
+                        if ((mask & (Nbpawn | Nbrook | Nbknight | Nbbishop | Nbqueen | Nbking)) != 0){//check if there is a piece to eat
                             //remove the piece that got eated
                             mask = ~mask;
                             Nbpawn &= mask;
@@ -1045,7 +1233,7 @@ int main(){
     bpawn ^= mask;
     bpawn ^= mask>>1;
 
-    wbishop = 68719476736;
+    wknight = 68719476736;
     //can delete ////////////////////////////////////////////////////////////
 
     minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos, 1);
