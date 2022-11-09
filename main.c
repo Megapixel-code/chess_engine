@@ -825,6 +825,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
             //=========================================================[kingmv]=====================================================//king left and right dont colide
             if (target & wking){
+            	Notherinfos &= 207; //remove the casling
                 Nwking ^= target;//remove the wking
                 mask = target << 9;
                 for (int _ = 0; _ < 2; _++){//line up and down
@@ -957,7 +958,43 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                     //remove the king
                     Nwking ^= mask;
                 }
+                
                 Nwking ^= target;//place the king back
+                Notherinfos = otherinfos;
+                
+                //-------------------------------------------------[casling]-------------------------------------------------
+                //--------[right]--------
+                if ((Notherinfos & 16) && ((wpawn|bpawn|wrook|brook|wbishop|bbishop|wknight|bknight|wqueen|bqueen|bking)&(target>>1|target>>2) == 0)){//can casle right and no piece in between
+                	//make shure not attacked
+                	char notAttacked = 1;
+                	
+                	
+                	if(notAttacked){
+                		Notherinfos &= 207; //remove the casling
+		            	Nwking ^= 10;
+		            	Nwrook ^= 5;
+		            	//evaluate
+		            	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+		            	Nwking = wking;
+		            	Nwrook = wrook;
+		            	Notherinfos = otherinfos;
+                	}
+                }
+                //--------[left]--------
+                if ((Notherinfos & 32) && ((wpawn|bpawn|wrook|brook|wbishop|bbishop|wknight|bknight|wqueen|bqueen|bking)&(target<<1|target<<2) == 0)){//can casle left and no piece in between
+                	//make shure not attacked
+                	
+                	if(notAttacked){
+                		Notherinfos &= 207; //remove the casling
+		            	Nwking ^= 40;
+		            	Nwrook ^= 144;
+		            	//evaluate
+		            	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+		            	Nwking = wking;
+		            	Nwrook = wrook;
+		            	Notherinfos = otherinfos;
+                	}
+                }
             }
 
             target >>= 1;
@@ -1198,7 +1235,7 @@ int main(){
 
     unsigned long pawnmv = 65535;//first 16 bits are for if it can be taken with en-passant (8b 8w)\\ last 16 bits for if the first move is done (8b 8w)
     unsigned char otherinfos = 241;//bleft bright wleft wright 0 0 \\ 1 bturn \\ 1 wturn
-
+	
     minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos, 1);
     printBoard(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
     
