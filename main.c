@@ -139,6 +139,7 @@ int getEval(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop, 
 
 float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop, uint64_t wqueen, uint64_t wking, uint64_t bpawn, uint64_t brook, uint64_t bknight, uint64_t bbishop, uint64_t bqueen, uint64_t bking, unsigned long pawnmv, unsigned char otherinfos, int depth){
     if (depth == 0){
+        printBoard(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
         return getEval(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
     }
     
@@ -774,7 +775,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
 
                 mask = target<<6;
                 for (int __ = 0; __ < 2; __++){
-                    if (mask != 0 && (mask & 13889313184910721216) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//13889313184910721216 is a wall of 2 1 on the left
+                    if (mask != 0 && (mask & 13889313184910721216LLU) == 0 && (mask & (Nwpawn | Nwrook | Nwknight | Nwbishop | Nwqueen | Nwking)) == 0){//13889313184910721216 is a wall of 2 1 on the left
                         //place knight
                         Nwknight ^= mask;
 
@@ -1168,7 +1169,7 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
             }
             target >>= 1;
         }
-        //othermoves
+        //othermoves 
     }
 
     else{
@@ -1197,44 +1198,6 @@ int main(){
 
     unsigned long pawnmv = 65535;//first 16 bits are for if it can be taken with en-passant (8b 8w)\\ last 16 bits for if the first move is done (8b 8w)
     unsigned char otherinfos = 241;//bleft bright wleft wright 0 0 \\ 1 bturn \\ 1 wturn
-
-    //tests //////////////////////////////////////////////////////////
-    uint64_t mask = 1<<8;
-    wpawn ^= mask;
-    wpawn ^= mask<<1;
-
-    mask <<= 16;
-    wpawn ^= mask;
-    wpawn ^= mask<<1;
-
-    mask <<= 9;
-    bpawn ^= mask;
-    bpawn ^= mask>>1;
-
-    mask <<= 16;
-    bpawn ^= mask;
-    bpawn ^= mask>>1;
-
-    //
-
-    mask = 1<<14;
-    wpawn ^= mask;
-    wpawn ^= mask<<1;
-
-    mask <<= 16;
-    wpawn ^= mask;
-    wpawn ^= mask<<1;
-
-    mask <<= 9;
-    bpawn ^= mask;
-    bpawn ^= mask>>1;
-
-    mask <<= 16;
-    bpawn ^= mask;
-    bpawn ^= mask>>1;
-
-    wknight = 68719476736;
-    //can delete ////////////////////////////////////////////////////////////
 
     minmax(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, pawnmv, otherinfos, 1);
     printBoard(wpawn, wrook, wknight, wbishop, wqueen, wking, bpawn, brook, bknight, bbishop, bqueen, bking, otherinfos);
