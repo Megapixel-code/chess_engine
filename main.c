@@ -966,8 +966,22 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 //--------[right]--------
                 if ((Notherinfos & 16) && ((wpawn|bpawn|wrook|brook|wbishop|bbishop|wknight|bknight|wqueen|bqueen|bking)&(target>>1|target>>2) == 0)){//can casle right and no piece in between
                 	//make shure not attacked
-                	char notAttacked = 1;
-                	
+                    char notAttacked = 1;
+                    char dontExit = 1;
+                    for (int i = 0; i < 2; i++){
+                        mask = target>>i;
+                        
+                        mask <<= 7;
+                    
+                        while (dontExit && mask != 0 && !(mask & 9259542123273814144LLU)){//9259542123273814144 is a wall of 1 on the left
+                            if (mask & (Nbbishop | Nbqueen)){
+                                notAttacked = 0;
+                                dontExit = 0;
+                            }
+                            mask <<= 7
+                        }
+                    }
+                    
                 	
                 	if(notAttacked){
                 		Notherinfos &= 207; //remove the casling
@@ -983,13 +997,14 @@ float minmax(uint64_t wpawn, uint64_t wrook, uint64_t wknight, uint64_t wbishop,
                 //--------[left]--------
                 if ((Notherinfos & 32) && ((wpawn|bpawn|wrook|brook|wbishop|bbishop|wknight|bknight|wqueen|bqueen|bking)&(target<<1|target<<2) == 0)){//can casle left and no piece in between
                 	//make shure not attacked
+                    char notAttacked = 1;
                 	
                 	if(notAttacked){
                 		Notherinfos &= 207; //remove the casling
 		            	Nwking ^= 40;
 		            	Nwrook ^= 144;
 		            	//evaluate
-		            	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+		            	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa(mask & 72340172838076673)){//72340172838076673 is a wall of 1 on the right
 		            	Nwking = wking;
 		            	Nwrook = wrook;
 		            	Notherinfos = otherinfos;
@@ -1245,3 +1260,4 @@ int main(){
     //printToB(wpawn);
     return 0;
 }
+
